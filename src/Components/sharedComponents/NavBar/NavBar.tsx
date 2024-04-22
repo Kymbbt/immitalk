@@ -18,7 +18,8 @@ import {
 import { useNavigate } from 'react-router-dom'; 
 import CottageIcon from '@mui/icons-material/Cottage';
 import PublishIcon from '@mui/icons-material/Publish';
-// import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import { signOut, getAuth } from 'firebase/auth'; 
 
 
 
@@ -85,6 +86,8 @@ export const NavBar = () => {
     // setup all your hooks & variables
     const [ open, setOpen ] = useState(false) //setting initial state to false as in NOT open
     const navigate = useNavigate(); 
+    const myAuth = localStorage.getItem('auth') 
+    const auth = getAuth(); 
 
 
     // 2 functions to help us set our hook
@@ -109,8 +112,38 @@ export const NavBar = () => {
             icon: <PublishIcon />,
             onClick: () => navigate('/post')
         },
-       
+        {  
+            text: myAuth === 'true' ? 'Post' : 'Sign In',
+            icon: myAuth === 'true' ? <PublishIcon /> : <AssignmentIndIcon />,
+            onClick: () => navigate(myAuth === 'true' ? '/shop' : '/auth') 
+        },
+        {  
+            text: myAuth === 'true' ? 'Cart' : '',
+            icon: myAuth === 'true' ? <PublishIcon /> : "",
+            onClick: myAuth === 'true' ? () => navigate('/cart') : () => {} 
+        }
     ]
+
+    let signInText = 'Sign In'
+       
+    if (myAuth === 'true') { 
+         signInText = 'Sign Out'
+    }
+ 
+    const signInButton = async () => {
+        if (myAuth === 'false') {
+            navigate('/auth')
+        } else {
+            await signOut(auth)
+            localStorage.setItem('auth', 'false')
+            localStorage.setItem('user', '')
+            localStorage.setItem('uuid', '')
+            navigate('/')
+        }
+    }
+       
+       
+
 
     return (
         <Box sx={{display: 'flex'}}>
@@ -143,8 +176,9 @@ export const NavBar = () => {
                             color = 'info'
                             size = 'large'
                             sx = {{ marginLeft: '20px'}}
+                            onClick = { signInButton }
                         >
-                            Sign In
+                            { signInText}
                         </Button>
                     </Stack>
             </AppBar>
